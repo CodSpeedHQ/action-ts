@@ -3,6 +3,8 @@ export interface ActionInputs {
   uploadUrl: string;
   run: string;
   workingDirectory: string | undefined;
+  noSudo: boolean;
+  noPipInstall: boolean;
   tokenless: boolean;
 }
 

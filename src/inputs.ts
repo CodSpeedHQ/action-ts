@@ -9,6 +9,8 @@ export const getActionInputs = (): ActionInputs => {
     run: core.getInput("run", {required: true}),
     workingDirectory:
       core.getInput("working-directory", {required: false}) || undefined,
+    noSudo: core.getInput("no-sudo", {required: false}) === "true",
+    noPipInstall: core.getInput("no-pip-install", {required: false}) === "true",
     token,
     tokenless,
   };

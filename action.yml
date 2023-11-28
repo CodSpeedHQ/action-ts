@@ -17,6 +17,16 @@ inputs:
       The directory where the `run` command will be executed.
       Warning: if you use defaults.working-directory, you must still set this parameter.
     required: false
+
+  no-sudo:
+    description: "Do not use sudo to setup the environment"
+    required: false
+  no-pip-install:
+    # This will be removed and made the default behavior in the next release
+    # https://github.com/CodSpeedHQ/action/issues/83
+    description: "Do not install pip dependencies"
+    required: false
+
   upload_url:
     description: "The upload endpoint (for on-premise deployments)"
     default: "https://api.codspeed.io/upload"

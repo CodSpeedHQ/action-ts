@@ -21,7 +21,7 @@ async function main(): Promise<void> {
   try {
     core.info(banner);
     const inputs = getActionInputs();
-    await prepare();
+    await prepare(inputs);
     const {profileFolder} = await run(inputs);
     if (!CODSPEED_SKIP_UPLOAD) {
       await upload(inputs, profileFolder);

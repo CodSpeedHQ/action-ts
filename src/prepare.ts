@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import {exec} from "@actions/exec";
 import {checkValgrindVersion} from "./helpers/valgrind";
 import {downloadFile} from "./helpers/fetch";
+import {ActionInputs} from "./interfaces";
 
 const VALGRIND_CODSPEED_VERSION = "3.21.0-0codspeed1";
 
@@ -42,7 +43,7 @@ const getSystemInfo = async (): Promise<SystemInfo> => {
   return {os, osVersion, arch};
 };
 
-const prepare = async (): Promise<void> => {
+const prepare = async (inputs: ActionInputs): Promise<void> => {
   core.startGroup("Prepare environment");
   try {
     const sysInfo = await getSystemInfo();
@@ -66,21 +67,24 @@ const prepare = async (): Promise<void> => {
     const debFilePath = "/tmp/valgrind-codspeed.deb";
     await downloadFile(valgrindDebUrl, debFilePath);
 
+    const sudo = inputs.noSudo ? "" : "sudo ";
     // always update the `apt` index before installing
-    await exec(`sudo apt update`, [], {silent: true});
-    await exec(`sudo apt install ${debFilePath}`, [], {silent: true});
+    await exec(`${sudo}apt update`, [], {silent: true});
+    await exec(`${sudo}apt install ${debFilePath}`, [], {silent: true});
     await checkValgrindVersion();
-    try {
-      await exec("pip show pytest-codspeed", [], {
-        silent: true,
-      });
-    } catch (e) {
-      core.warning(
-        "pytest-codspeed is not installed in your environment. Installing it..."
-      );
-      await exec("pip install pytest-codspeed", [], {
-        silent: true,
-      });
+    if (!inputs.noPipInstall) {
+      try {
+        await exec("pip show pytest-codspeed", [], {
+          silent: true,
+        });
+      } catch (e) {
+        core.warning(
+          "pytest-codspeed is not installed in your environment. Installing it..."
+        );
+        await exec("pip install pytest-codspeed", [], {
+          silent: true,
+        });
+      }
     }
   } catch (error) {
     throw new Error(`Failed to prepare environment: ${error}`);
