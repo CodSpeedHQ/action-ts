@@ -9,6 +9,12 @@ inputs:
   token:
     description: "CodSpeed upload token"
     required: false
+  shell:
+    description:  |
+      The shell to run commands in.
+      Warning: if you use defaults.run.shell, you must still set this parameter.
+    required: false
+    default: bash
   run:
     description: "The command to run the benchmarks"
     required: true
@@ -40,7 +46,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - shell: ${{ inputs.shell }}
       run: |
         # Configure and run codspeed-runner
 
