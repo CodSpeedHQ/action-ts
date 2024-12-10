@@ -20,6 +20,12 @@ GitHub Actions for running [CodSpeed](https://codspeed.io) in your CI.
     # If you're instrumenting a public repository, you can omit this value
     token: ""
 
+    # [OPTIONAL]
+    # The shell to run commands in.
+    # Defaults to bash.
+    # ⚠️ WARNING: if you use `defaults.run.shell`, you must still set this parameter.
+    shell: ""
+
     # [REQUIRED]
     # The command used to run your codspeed benchmarks
     run: ""
