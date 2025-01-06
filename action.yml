@@ -26,6 +26,10 @@ inputs:
     description: "The version of the runner to use"
     required: false
 
+  runner-branch:
+    description: "The branch version of the runner to use"
+    required: false
+
   instruments:
     description: |
       Comma separated list of instruments to enable. The following instruments are available:
@@ -41,9 +45,13 @@ runs:
   using: "composite"
   steps:
     - shell: bash
+      env:
+        GH_MATRIX: "${{ toJson(matrix) }}"
+        # GH_ENV: "${{ toJson(env) }}"
+        # GH_GITHUB: "${{ toJson(github) }}"
+        GH_STRATEGY: "${{ toJson(strategy) }}"
       run: |
         # Configure and run codspeed-runner
-
         if [ -n "${{ inputs.runner-version }}" ]; then
           RUNNER_VERSION="${{ inputs.runner-version }}"
         else
@@ -69,12 +77,18 @@ runs:
         fi
 
         # Install the CodSpeedHQ/runner
-        head_status=$(curl -I -fsSL -w "%{http_code}" -o /dev/null https://github.com/CodSpeedHQ/runner/releases/download/v$RUNNER_VERSION/codspeed-runner-installer.sh)
-        if [ "$head_status" -eq 404 ]; then
-          echo "Error: Version $RUNNER_VERSION is not available in https://github.com/CodSpeedHQ/runner/releases, please a correct version."
-          exit 1
+        if [ -n "${{ inputs.runner-branch }}" ]; then
+          source $HOME/.cargo/env
+          cargo install --git https://github.com/CodSpeedHQ/runner --branch "${{ inputs.runner-branch }}"
+
         else
-          curl -fsSL https://github.com/CodSpeedHQ/runner/releases/download/v$RUNNER_VERSION/codspeed-runner-installer.sh | bash -s -- --quiet
+          head_status=$(curl -I -fsSL -w "%{http_code}" -o /dev/null https://github.com/CodSpeedHQ/runner/releases/download/v$RUNNER_VERSION/codspeed-runner-installer.sh)
+          if [ "$head_status" -eq 404 ]; then
+            echo "Error: Version $RUNNER_VERSION is not available in https://github.com/CodSpeedHQ/runner/releases, please a correct version."
+            exit 1
+          else
+            curl -fsSL https://github.com/CodSpeedHQ/runner/releases/download/v$RUNNER_VERSION/codspeed-runner-installer.sh | bash -s -- --quiet
+          fi
         fi
 
         # Run the benchmarks
